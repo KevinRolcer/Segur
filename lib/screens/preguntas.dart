@@ -309,7 +309,7 @@ class _QuizScreenState extends State<QuizScreen> {
                     child: TextField(
                       controller: observacionesController,
                       readOnly: true,
-                      decoration: const InputDecoration(labelText: "Observaciones "),
+                      decoration: const InputDecoration(labelText: "Observacioness "),
                     ),
                   ),
                   IconButton(
