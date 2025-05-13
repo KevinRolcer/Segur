@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "516123955902",
+    "project_id": "noms-173a5",
+    "storage_bucket": "noms-173a5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:516123955902:android:7d361d4d70e38fdc0ac4ef",
+        "android_client_info": {
+          "package_name": "com.example.innova"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnkfPK73iji0gvkPC73UTJ3EAGAxzlhLY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
