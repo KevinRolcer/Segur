@@ -153,23 +153,23 @@ class _AgendaDiariaState extends State<AgendaDiaria> {
           ),
         ],
       ),
-        drawer: Drawer(
-          child: ListView(
-            children: [
-              const DrawerHeader(
-                decoration: BoxDecoration(color: AppColors.primaryColor),
-                child: Text("Menú", style: TextStyle(color: Colors.white)),
-              ),
-              _buildDrawerItem(context, Icons.home, "Inicio", "/"),
-              _buildDrawerItem(context, Icons.add, "Evaluar NOM", "/evaluar"),
-              _buildDrawerItem(context, Icons.group, "Equipo", "/equipo"),
-              _buildDrawerItem(context, Icons.apartment, "Organizaciones", "/organizaciones"),
-              _buildDrawerItem(context, Icons.history, "Historial de evaluaciones", "/historial"),
-              _buildDrawerItem(context, Icons.settings, "Configuración", "/configuracion"),
-              _buildDrawerItem(context, Icons.logout, "Cerrar sesión", "/logout"),
-            ],
-          ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: AppColors.primaryColor),
+              child: Text("Menú", style: TextStyle(color: Colors.white)),
+            ),
+            _buildDrawerItem(context, Icons.home, "Inicio", "/"),
+            _buildDrawerItem(context, Icons.add, "Evaluar NOM", "/evaluar"),
+            _buildDrawerItem(context, Icons.group, "Equipo", "/equipo"),
+            _buildDrawerItem(context, Icons.apartment, "Organizaciones", "/organizaciones"),
+            _buildDrawerItem(context, Icons.history, "Historial de evaluaciones", "/historial"),
+            _buildDrawerItem(context, Icons.settings, "Configuración", "/configuracion"),
+            _buildDrawerItem(context, Icons.logout, "Cerrar sesión", "/logout"),
+          ],
         ),
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SafeArea(

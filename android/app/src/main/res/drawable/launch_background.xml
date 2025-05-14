@@ -6,6 +6,6 @@
     <item>
         <bitmap
             android:gravity="fill"
-            android:src="@mipmap/nom" />
+            android:src="@mipmap/img" />
     </item>
 </layer-list>

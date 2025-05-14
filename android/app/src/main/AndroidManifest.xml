@@ -6,7 +6,7 @@
         android:required="false" />
     <application
         android:label="innova"
-        android:icon="@mipmap/nom"
+        android:icon="@mipmap/img"
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
 

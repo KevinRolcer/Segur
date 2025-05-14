@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../respuesta_service.dart';
 import '../itemO.dart';
 import '../respuesta_item.dart';
@@ -39,6 +40,8 @@ class QuizScreen extends StatefulWidget {
 
 class _QuizScreenState extends State<QuizScreen> {
   List<Pregunta> preguntas = [];
+  List<RespuestaItem> respuestasAnteriores = [];
+
   bool cargando = true;
 
   int preguntaActual = 0;
@@ -46,7 +49,6 @@ class _QuizScreenState extends State<QuizScreen> {
   String? aplicaRespuesta;
   String? cumpleRespuesta;
   TextEditingController observacionesController = TextEditingController();
-
   File? _image;
   final ImagePicker _picker = ImagePicker();
 
@@ -59,56 +61,78 @@ class _QuizScreenState extends State<QuizScreen> {
     }
   }
 
-  void _mostrarObservaciones() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom, top: 10),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Observaciones",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: TextField(
-                  controller: observacionesController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: "Escribe tus observaciones...",
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.camera_alt, size: 30),
-                onPressed: _pickImage,
-              ),
-              if (_image != null)
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Image.file(_image!, height: 100),
-                ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cerrar"),
-              ),
-            ],
-          ),
-        );
-      },
+  Future<void> _preguntaAnterior() async {
+    int valorItem = calcularValorItem();
+
+    RespuestaItem respuesta = RespuestaItem(
+      evaluacionId: widget.idNom,
+      itemId: preguntas[preguntaActual].id,
+      aplica: aplicaRespuesta ?? '',
+      cumple: cumpleRespuesta ?? '',
+      observaciones: observacionesController.text,
+      valor: valorItem,
     );
+
+    try {
+      final servicio = RespuestaService();
+      await servicio.editarRespuesta(respuesta);
+    } catch (e) {
+      print("Error al actualizar la respuesta: $e");
+    }
+
+    setState(() {
+      preguntaActual--;
+      _cargarRespuestaAnterior();
+    });
+  }
+
+  Future<void> _cargarRespuestaAnterior() async {
+    int itemId = preguntas[preguntaActual].id;
+    RespuestaItem? respuesta = respuestasAnteriores.firstWhere(
+          (r) => r.itemId == itemId,
+      orElse: () => RespuestaItem(
+        evaluacionId: widget.idNom,
+        itemId: itemId,
+        aplica: '',
+        cumple: '',
+        observaciones: '',
+        valor: 0,
+      ),
+    );
+
+    setState(() {
+      aplicaRespuesta = respuesta.aplica;
+      cumpleRespuesta = respuesta.cumple;
+      observacionesController.text = respuesta.observaciones;
+      _image = null; // Si quieres cargar imagen previa, adapta aquí.
+    });
+  }
+
+  Future<void> _cargarRespuestasAnteriores() async {
+    try {
+      final servicio = RespuestaService();
+      List<RespuestaItem> respuestasObtenidas =
+      await servicio.obtenerRespuestas(widget.idNom);
+
+      setState(() {
+        respuestasAnteriores = respuestasObtenidas;
+      });
+
+      _cargarRespuestaAnterior();
+    } catch (e) {
+      print('Error al cargar respuestas anteriores: $e');
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    _cargarPreguntas();
+    _cargarTodo();
+  }
+
+  Future<void> _cargarTodo() async {
+    await _cargarPreguntas();
+    await _cargarRespuestasAnteriores();
   }
 
   Future<void> _cargarPreguntas() async {
@@ -189,6 +213,7 @@ class _QuizScreenState extends State<QuizScreen> {
         cumpleRespuesta = null;
         observacionesController.clear();
         _image = null;
+        _cargarRespuestaAnterior();
       });
     } else {
       showDialog(
@@ -205,6 +230,52 @@ class _QuizScreenState extends State<QuizScreen> {
         ),
       );
     }
+  }
+
+  void _mostrarObservaciones() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom, top: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                "Observaciones",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: TextField(
+                  controller: observacionesController,
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText: "Escribe tus observaciones...",
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.camera_alt, size: 30),
+                onPressed: _pickImage,
+              ),
+              if (_image != null)
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Image.file(_image!, height: 100),
+                ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cerrar"),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Widget buildOpcion(
@@ -266,6 +337,10 @@ class _QuizScreenState extends State<QuizScreen> {
         backgroundColor: Colors.white,
         elevation: 1,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: preguntaActual > 0 ? _preguntaAnterior : null,
+        ),
       ),
       body: cargando
           ? const Center(child: CircularProgressIndicator())
@@ -284,48 +359,49 @@ class _QuizScreenState extends State<QuizScreen> {
               const SizedBox(height: 5),
               Text(
                 "Pregunta ${preguntaActual + 1} de ${preguntas.length}",
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+              ),
+              const SizedBox(height: 10),
+              LinearProgressIndicator(
+                value: progreso,
+                backgroundColor: Colors.grey.shade200,
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.orange),
               ),
               const SizedBox(height: 20),
               Text(
                 preguntas[preguntaActual].texto,
-                style: const TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
               const SizedBox(height: 20),
-              buildOpcion("¿Aplica?", aplicaRespuesta, (val) {
-                setState(() {
-                  aplicaRespuesta = val;
-                });
-              }),
-              buildOpcion("¿Cumple?", cumpleRespuesta, (val) {
-                setState(() {
-                  cumpleRespuesta = val;
-                });
-              }, habilitado: aplicaRespuesta == 'Sí'),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: observacionesController,
-                      readOnly: true,
-                      decoration: const InputDecoration(labelText: "Observaciones "),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.edit_note),
-                    onPressed: _mostrarObservaciones,
-                  ),
-                ],
+              buildOpcion(
+                "¿Aplica?",
+                aplicaRespuesta,
+                    (value) => setState(() => aplicaRespuesta = value),
+              ),
+              buildOpcion(
+                "¿Cumple?",
+                cumpleRespuesta,
+                    (value) => setState(() => cumpleRespuesta = value),
+              ),
+              ElevatedButton(
+                onPressed: _mostrarObservaciones,
+                child: const Text("Añadir Observaciones"),
               ),
               const Spacer(),
-              LinearProgressIndicator(value: progreso),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: siguientePregunta,
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                child: const Text("Siguiente"),
-              ),
+              Row(
+                children: [
+                  if (preguntaActual > 0)
+                    TextButton(
+                      onPressed: _preguntaAnterior,
+                      child: const Text("Anterior"),
+                    ),
+                  const Spacer(),
+                  ElevatedButton(
+                    onPressed: siguientePregunta,
+                    child: const Text("Siguiente"),
+                  ),
+                ],
+              )
             ],
           ),
         ),

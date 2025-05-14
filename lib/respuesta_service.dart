@@ -6,6 +6,7 @@ import 'respuesta_item.dart';
 class RespuestaService {
   final String baseUrl = "https://kevinrolcer.com/api/item.php";
 
+  // Obtener los ítems según el 'nomId'
   Future<List<Item>> obtenerItems(int nomId) async {
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -26,6 +27,7 @@ class RespuestaService {
     }
   }
 
+  // Obtener las respuestas basadas en 'evaluacionId'
   Future<List<RespuestaItem>> obtenerRespuestas(int evaluacionId) async {
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -46,6 +48,7 @@ class RespuestaService {
     }
   }
 
+  // Crear una nueva respuesta
   Future<void> crearRespuesta(RespuestaItem respuesta) async {
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -61,6 +64,7 @@ class RespuestaService {
     }
   }
 
+  // Editar una respuesta existente
   Future<void> editarRespuesta(RespuestaItem respuesta) async {
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -76,6 +80,7 @@ class RespuestaService {
     }
   }
 
+  // Eliminar una respuesta basada en 'evaluacionId' y 'itemId'
   Future<void> eliminarRespuesta(int evaluacionId, int itemId) async {
     final response = await http.post(
       Uri.parse(baseUrl),
