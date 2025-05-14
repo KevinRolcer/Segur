@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import '../respuesta_service.dart';
 import '../itemO.dart';
 import '../respuesta_item.dart';
+import '../values/app_colors.dart';
+
 
 class Pregunta {
   final int id;
@@ -61,6 +63,8 @@ class _QuizScreenState extends State<QuizScreen> {
     }
   }
 
+
+
   Future<void> _preguntaAnterior() async {
     int valorItem = calcularValorItem();
 
@@ -104,7 +108,7 @@ class _QuizScreenState extends State<QuizScreen> {
       aplicaRespuesta = respuesta.aplica;
       cumpleRespuesta = respuesta.cumple;
       observacionesController.text = respuesta.observaciones;
-      _image = null; // Si quieres cargar imagen previa, adapta aquí.
+      _image = null;
     });
   }
 
@@ -268,6 +272,10 @@ class _QuizScreenState extends State<QuizScreen> {
                   child: Image.file(_image!, height: 100),
                 ),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.darkMode,
+                foregroundColor: Colors.white,
+              ),
                 onPressed: () => Navigator.pop(context),
                 child: const Text("Cerrar"),
               ),
@@ -309,14 +317,14 @@ class _QuizScreenState extends State<QuizScreen> {
                 value: 'Sí',
                 groupValue: seleccion,
                 onChanged: habilitado ? (val) => onChange(val!) : null,
-                activeColor: Colors.orange,
+                activeColor: AppColors.primaryColor,
               ),
               const Text('Sí'),
               Radio<String>(
                 value: 'No',
                 groupValue: seleccion,
                 onChanged: habilitado ? (val) => onChange(val!) : null,
-                activeColor: Colors.orange,
+                activeColor: AppColors.primaryColor,
               ),
               const Text('No'),
             ],
@@ -365,7 +373,7 @@ class _QuizScreenState extends State<QuizScreen> {
               LinearProgressIndicator(
                 value: progreso,
                 backgroundColor: Colors.grey.shade200,
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.orange),
+                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
               ),
               const SizedBox(height: 20),
               Text(
@@ -385,7 +393,12 @@ class _QuizScreenState extends State<QuizScreen> {
               ),
               ElevatedButton(
                 onPressed: _mostrarObservaciones,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.darkMode,
+                  foregroundColor: Colors.white,
+                ),
                 child: const Text("Añadir Observaciones"),
+
               ),
               const Spacer(),
               Row(
@@ -393,10 +406,18 @@ class _QuizScreenState extends State<QuizScreen> {
                   if (preguntaActual > 0)
                     TextButton(
                       onPressed: _preguntaAnterior,
+                      style: TextButton.styleFrom(
+                        backgroundColor: AppColors.darkMode,
+                        foregroundColor: Colors.white,
+                      ),
                       child: const Text("Anterior"),
                     ),
                   const Spacer(),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.darkMode,
+                      foregroundColor: Colors.white,
+                    ),
                     onPressed: siguientePregunta,
                     child: const Text("Siguiente"),
                   ),
